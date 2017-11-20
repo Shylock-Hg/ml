@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+#specification in tensorflow project
+#add by Shylock Hg
+.csv
+model.ckpt*
+checkpoint
+events.out*
+graph.pbtxt
