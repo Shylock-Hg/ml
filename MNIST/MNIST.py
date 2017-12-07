@@ -176,7 +176,6 @@ def train():
 
 
 #predict 
-
 def predict():
     test_set = load_test_data(TEST_FILE)
     test_set['images'] = (np.asarray(test_set['images'],dtype=np.float32)-128)/128
@@ -192,7 +191,16 @@ def predict():
         for i,v in enumerate(predictions):
             f.write(str(i+1)+','+str(v['classes'])+'\n')
 
+#predict one image from cmd args
+def predict_image(url):
+    #load model
+    CNNClassifier = tf.estimator.Estimator(model_fn=fn_construct_model,model_dir=r'./tmp/model')
+    #load image
+    with open(url) as f:
+
+
 def main(unused_argv):
+    print(unused_argv)
     train()
     predict()
    
