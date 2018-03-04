@@ -1,4 +1,4 @@
-#! /home/shylock/App/miniconda3/bin
+#! /home/shylock/App/miniconda3/envs/mltoolchain/bin/python
 
 import sys
 
@@ -47,25 +47,24 @@ def prepare_country_stats(oecd_bli,gdp_per_capita):
     #slice by **feature**['GDP per capita','Life satisfaction'] & **indices**[keep_indices]
     return full_country_stats[['GDP per capita','Life satisfaction']].iloc[keep_indices]
 
-"""
+'''
 def prepare_country_stats(oecd_bli, gdp_per_capita):
-    oecd_bli = oecd_bli[oecd_bli["INEQUALITY"]=="TOT"]
-    oecd_bli = oecd_bli.pivot(index="Country", columns="Indicator", values="Value")
-    gdp_per_capita.rename(columns={"2015": "GDP per capita"}, inplace=True)
-    gdp_per_capita.set_index("Country", inplace=True)
+    oecd_bli = oecd_bli[oecd_bli['INEQUALITY']=='TOT']
+    oecd_bli = oecd_bli.pivot(index='Country', columns='Indicator', values='Value')
+    gdp_per_capita.rename(columns={'2015': 'GDP per capita'}, inplace=True)
+    gdp_per_capita.set_index('Country', inplace=True)
     full_country_stats = pd.merge(left=oecd_bli, right=gdp_per_capita,
                                   left_index=True, right_index=True)
-    full_country_stats.sort_values(by="GDP per capita", inplace=True)
+    full_country_stats.sort_values(by='GDP per capita', inplace=True)
     remove_indices = [0, 1, 6, 8, 33, 34, 35]
     keep_indices = list(set(range(36)) - set(remove_indices))
-    return full_country_stats[["GDP per capita", 'Life satisfaction']].iloc[keep_indices]
-"""
+    return full_country_stats[['GDP per capita', 'Life satisfaction']].iloc[keep_indices]
+'''
 
-def main(argv):
-    print(argv)
+def main(argc,argv):
     valid_params = ['linear','kNN']
-    if len(argv) != 2 :
-        raise Exception('Invalid count of parameter:{}'.format(len(argv)))
+    if 2!=argc :
+        raise Exception('Invalid count of parameter:{}'.format(argc))
     elif argv[1] not in valid_params :
         raise Exception('Invalid parameter value:{}'.format(argv[1]))
     #load the data
@@ -75,11 +74,11 @@ def main(argv):
 
     #prepare the data
     country_stats = prepare_country_stats(oecd_bli,gdp_per_capita)
-    X = np.c_[country_stats["GDP per capita"]]
-    y = np.c_[country_stats["Life satisfaction"]]
+    X = np.c_[country_stats['GDP per capita']]
+    y = np.c_[country_stats['Life satisfaction']]
 
     #visualize the data
-    country_stats.plot(kind='scatter',x="GDP per capita",y="Life satisfaction")
+    country_stats.plot(kind='scatter',x='GDP per capita',y='Life satisfaction')
     plt.show()
 
     if 'linear' == argv[1]:
@@ -97,5 +96,4 @@ def main(argv):
     print(regressor.predict(Cyprus))  ##output the prediction
 
 if '__main__' == __name__:
-    print(sys.argv)
-    main(sys.argv)
+    main(len(sys.argv),sys.argv)
