@@ -100,9 +100,10 @@ ENV/
 # mypy
 .mypy_cache/
 
-#specification in tensorflow project
 #add by Shylock Hg
-.csv
+.log  #stdio stderr
+.csv  #data set
+#tensorflow build files
 model.ckpt*
 checkpoint
 events.out*
