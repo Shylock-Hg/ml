@@ -100,9 +100,12 @@ ENV/
 # mypy
 .mypy_cache/
 
-#add by Shylock Hg
+
+###############add by Shylock Hg#################
+
 .log  #stdio stderr
 .csv  #data set
+
 #tensorflow build files
 model.ckpt*
 checkpoint
