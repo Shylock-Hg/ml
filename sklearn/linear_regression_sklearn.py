@@ -1,5 +1,7 @@
 #! /home/shylock/App/miniconda3/bin
 
+import sys
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,12 +42,12 @@ def prepare_country_stats(oecd_bli,gdp_per_capita):
     remove_indices = set([0,1,6,8,33,34,35])
     keep_indices = list(set(range(36))-remove_indices)
 
-    print(full_country_stats['Life satisfaction'])
+    #print(full_country_stats['Life satisfaction'])
 
     #slice by **feature**['GDP per capita','Life satisfaction'] & **indices**[keep_indices]
     return full_country_stats[['GDP per capita','Life satisfaction']].iloc[keep_indices]
 
-'''
+"""
 def prepare_country_stats(oecd_bli, gdp_per_capita):
     oecd_bli = oecd_bli[oecd_bli["INEQUALITY"]=="TOT"]
     oecd_bli = oecd_bli.pivot(index="Country", columns="Indicator", values="Value")
@@ -57,32 +59,43 @@ def prepare_country_stats(oecd_bli, gdp_per_capita):
     remove_indices = [0, 1, 6, 8, 33, 34, 35]
     keep_indices = list(set(range(36)) - set(remove_indices))
     return full_country_stats[["GDP per capita", 'Life satisfaction']].iloc[keep_indices]
-'''
+"""
 
-#load the data
-oecd_bli = pd.read_csv(PATH_OECE_BLI,thousands=',');
-gdp_per_capita = pd.read_csv(PATH_GDP_PER_CAPITA,thousands=',',delimiter='\t',
-        encoding='latin1',na_values='n/a');
+def main(argv):
+    print(argv)
+    valid_params = ['linear','kNN']
+    if len(argv) != 2 :
+        raise Exception('Invalid count of parameter:{}'.format(len(argv)))
+    elif argv[1] not in valid_params :
+        raise Exception('Invalid parameter value:{}'.format(argv[1]))
+    #load the data
+    oecd_bli = pd.read_csv(PATH_OECE_BLI,thousands=',');
+    gdp_per_capita = pd.read_csv(PATH_GDP_PER_CAPITA,thousands=',',delimiter='\t',
+            encoding='latin1',na_values='n/a');
 
-#prepare the data
-country_stats = prepare_country_stats(oecd_bli,gdp_per_capita)
-X = np.c_[country_stats["GDP per capita"]]
-y = np.c_[country_stats["Life satisfaction"]]
+    #prepare the data
+    country_stats = prepare_country_stats(oecd_bli,gdp_per_capita)
+    X = np.c_[country_stats["GDP per capita"]]
+    y = np.c_[country_stats["Life satisfaction"]]
 
-#visualize the data
-country_stats.plot(kind='scatter',x="GDP per capita",y="Life satisfaction")
-plt.show()
+    #visualize the data
+    country_stats.plot(kind='scatter',x="GDP per capita",y="Life satisfaction")
+    plt.show()
 
-#select a linear regressor
-regressor = sklearn.linear_model.LinearRegression()
+    if 'linear' == argv[1]:
+        #select a linear regressor
+        regressor = sklearn.linear_model.LinearRegression()
+    else:
+        #select a kNN regressor
+        regressor = sklearn.neighbors.KNeighborsRegressor(n_neighbors=3)
 
-#select a kNN regressor
-#regressor = sklearn.neighbors.KNeighborsRegressor(n_neighbors=3)
+    #train a regressor by [X,y]
+    regressor.fit(X,y)
 
-#train a regressor by [X,y]
-regressor.fit(X,y)
+    #make a prediction for Cyprus
+    Cyprus = [[22587]] #Cyprus's GDP per capita
+    print(regressor.predict(Cyprus))  ##output the prediction
 
-#make a prediction for Cyprus
-Cyprus = [[22587]] #Cyprus's GDP per capita
-print(regressor.predict(Cyprus))  ##output the prediction
-
+if '__main__' == __name__:
+    print(sys.argv)
+    main(sys.argv)

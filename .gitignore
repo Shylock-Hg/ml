@@ -103,8 +103,8 @@ ENV/
 
 ###############add by Shylock Hg#################
 
-.log  #stdio stderr
-.csv  #data set
+*.log  #stdio stderr
+*.csv  #data set
 
 #tensorflow build files
 model.ckpt*
