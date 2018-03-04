@@ -1,6 +1,7 @@
 #! /home/shylock/App/miniconda3/envs/mltoolchain/bin/python
 
 import sys
+import argparse
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -61,12 +62,21 @@ def prepare_country_stats(oecd_bli, gdp_per_capita):
     return full_country_stats[['GDP per capita', 'Life satisfaction']].iloc[keep_indices]
 '''
 
-def main(argc,argv):
+def main():
+    #handle arguments from terminal
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('method',help='Choose a regressor from <linear> or <kNN>.')
+    args = argparser.parse_args()
+
+    #check args
+    '''
     valid_params = ['linear','kNN']
     if 2!=argc :
         raise Exception('Invalid count of parameter:{}'.format(argc))
     elif argv[1] not in valid_params :
         raise Exception('Invalid parameter value:{}'.format(argv[1]))
+    '''
+
     #load the data
     oecd_bli = pd.read_csv(PATH_OECE_BLI,thousands=',');
     gdp_per_capita = pd.read_csv(PATH_GDP_PER_CAPITA,thousands=',',delimiter='\t',
@@ -81,12 +91,14 @@ def main(argc,argv):
     country_stats.plot(kind='scatter',x='GDP per capita',y='Life satisfaction')
     plt.show()
 
-    if 'linear' == argv[1]:
+    if 'linear' == args.method:
         #select a linear regressor
         regressor = sklearn.linear_model.LinearRegression()
-    else:
+    elif 'kNN' == args.method:
         #select a kNN regressor
         regressor = sklearn.neighbors.KNeighborsRegressor(n_neighbors=3)
+    else:
+        raise Exception('Inavalid parameter : {}'.format(args.method))
 
     #train a regressor by [X,y]
     regressor.fit(X,y)
@@ -96,4 +108,5 @@ def main(argc,argv):
     print(regressor.predict(Cyprus))  ##output the prediction
 
 if '__main__' == __name__:
-    main(len(sys.argv),sys.argv)
+    main()
+
