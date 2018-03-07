@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 import sklearn.linear_model
 
-PATH_OECE_BLI = './dataset/oecd_bli_2015.csv'
-PATH_GDP_PER_CAPITA='./dataset/gdp_per_capita.csv'
+PATH_OECE_BLI = './datasets/life_sta/oecd_bli_2015.csv'
+PATH_GDP_PER_CAPITA='./datasets/life_sta/gdp_per_capita.csv'
 
 def prepare_country_stats(oecd_bli,gdp_per_capita):
     '''
@@ -67,15 +67,7 @@ def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('method',help='Choose a regressor from <linear> or <kNN>.')
     args = argparser.parse_args()
-
-    #check args
-    '''
-    valid_params = ['linear','kNN']
-    if 2!=argc :
-        raise Exception('Invalid count of parameter:{}'.format(argc))
-    elif argv[1] not in valid_params :
-        raise Exception('Invalid parameter value:{}'.format(argv[1]))
-    '''
+    print(args)
 
     #load the data
     oecd_bli = pd.read_csv(PATH_OECE_BLI,thousands=',');
