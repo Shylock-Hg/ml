@@ -88,7 +88,8 @@ def main():
         test_set['income_cat'].where(test_set['income_cat']<5, 5.0, inplace=True)
         test_dist = (test_set['income_cat'].value_counts()/len(test_set))
         housing_dist = (housing_data['income_cat'].value_counts()/len(housing_data))
-        print(housing_dist-test_dist)
+        #print(housing_dist-test_dist)
+
     elif 'stratified' == args.split:
         #category the value of 'median_income'
         housing_data['income_cat'] = np.ceil(housing_data['median_income']/1.5)
@@ -98,15 +99,49 @@ def main():
         split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)       
         #stratified simpling by housing_data['income_cat']
         for train_index,test_index in split.split(housing_data, housing_data['income_cat']):
-            strat_train_set = housing_data.loc[train_index]
-            strat_test_set = housing_data.loc[test_index]
+            train_set = housing_data.loc[train_index]
+            test_set = housing_data.loc[test_index]
 
         #overview split
-        strat_dist = (strat_test_set['income_cat'].value_counts()/len(strat_test_set))
+        strat_dist = (test_set['income_cat'].value_counts()/len(test_set))
         housing_dist = (housing_data['income_cat'].value_counts()/len(housing_data))
-        print(housing_dist-strat_dist)
+        #print(housing_dist-strat_dist)
+
+        #dropout 'income_cat'
+        for set in (train_set,test_set):
+            set.drop(['income_cat'], axis=1, inplace=True)
+
+    #visualize the train_set
+    if True == args.visual :
+        train_set.plot(kind='scatter', x='longitude', y='latitude',
+                alpha=0.1, 
+                #radius -- population
+                s=train_set['population']/100, label='population', 
+                #color -- median_house_value
+                c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
+        plt.legend()
+        plt.show()
+
+    if True == args.visual :
+        #attrs = ['median_house_value','median_income','total_rooms','housing_median_age']
+        #pd.plotting.scatter_matrix(train_set[attrs], figsize=(12,8))
+        train_set.plot(kind='scatter', x='median_income', y='median_house_value',
+                alpha=0.1)
+        plt.show()
 
 
-if '__main__' == __name__:
+    #create new attibute
+    train_set['rooms_per_household'] = train_set['total_rooms']/train_set['households']
+    train_set['bedrooms_per_room'] = train_set['total_bedrooms']/train_set['total_rooms']
+    train_set['population_per_household'] = train_set['population']/train_set['households']
+
+    #correlations matrix of each attribute to each other
+    corr = train_set.corr()
+    print(corr['median_house_value'].sort_values(ascending=False))
+    #print(corr)
+    #correlations vector of median_house_value to each attribute
+    #print(corr['median_house_value'].sort_values(ascending=False))
+
+if '__main__' == __name__ :
     main()
 
