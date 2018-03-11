@@ -17,6 +17,13 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import cross_val_score
+
+from sklearn.ensemble import RandomForestRegressor
+
+from sklearn.model_selection import GridSearchCV
+
 URL_ROOT = 'https://raw.githubusercontent.com/ageron/handson-ml/master/'
 HOUSING_PATH = 'datasets/housing'
 HOUSING_FILE = 'housing.tgz'
@@ -96,6 +103,11 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
                     bedrooms_per_room]
         else:
             return np.c_[X, rooms_per_household, population_per_household]
+
+def disp_scores(scores):
+    print('Scores:',scores)
+    print('Mean:',scores.mean())
+    print('Standard deviation:',scores.std())
 
 def main():
     # handle parameter
@@ -192,6 +204,10 @@ def main():
     train_data['input'] = train_set.drop('median_house_value',axis=1)
     train_data['output'] = train_set['median_house_value'].copy()
 
+    test_data = dict()
+    test_data['input'] = test_set.drop('median_house_value',axis=1)
+    test_data['output'] = test_set['median_house_value'].copy()
+
     #data prepare by pipeline
     attrs_num = list(train_data['input'].drop('ocean_proximity',1))
     attrs_cat = ['ocean_proximity']
@@ -216,9 +232,11 @@ def main():
         ])
 
     train_data['input'] = prepare_pipeline.fit_transform(train_data['input'])
-    print(train_data['input'])
+    test_data['input'] = prepare_pipeline.transform(test_data['input'])
+    #print(train_data['input'])
 
     #select and train model
+    #linear regressor `underfiting`
     #lin_reg = LinearRegression()
     #lin_reg.fit(train_data['input'],train_data['output'])
 
@@ -235,8 +253,58 @@ def main():
     #print(lin_rmse)
 
     #more complex model
+    #decision tree regressor `overfiting`
+    #tree_reg = DecisionTreeRegressor()
+    #tree_reg.fit(train_data['input'],train_data['output'])
 
+    #predict
+    #predictions = tree_reg.predict(train_data['input'])
+    #mse = mean_squared_error(train_data['output'],predictions)
+    #rmse = np.sqrt(mse)
+    #print(rmse)
 
+    #cross-validation
+    #scores = cross_val_score(tree_reg,train_data['input'],train_data['output'],
+    #        scoring='neg_mean_squared_error',cv=10)
+    #rmses = np.sqrt(-scores)
+    #disp_scores(rmses)
+
+    #random forest regressor
+    forest_reg = RandomForestRegressor()
+    #Grid Search results
+
+    #forest_reg.fit(train_data['input'],train_data['output'])
+    #predictions = forest_reg.predict(train_data['input'])
+    #mse = mean_squared_error(train_data['output'],predictions)
+    #print(np.sqrt(mse))
+    #scores = cross_val_score(forest_reg,train_data['input'],train_data['output'],
+    #        scoring='neg_mean_squared_error',cv=10)
+    #rmses = np.sqrt(-scores)
+    #disp_scores(rmses)
+
+    #Grid Search
+    hyperparam = [
+            {'n_estimators':[3,10,30], 'max_features':[2,4,6,8]},
+            {'bootstrap':[False], 'n_estimators':[3,10], 'max_features':[2,3,4]}
+            ]
+    grid_searcher = GridSearchCV(forest_reg, hyperparam, cv=5, scoring='neg_mean_squared_error')
+    grid_searcher.fit(train_data['input'],train_data['output'])
+    #print('Grid Searcher==>')
+    #print(grid_searcher.best_estimator_)
+
+    #Finally test
+    final_model = grid_searcher.best_estimator_
+    final_predictions = final_model.predict(test_data['input'])
+    final_mse = mean_squared_error(test_data['output'],final_predictions)
+    final_rmse = np.sqrt(final_mse)
+    print(final_rmse)
+
+    #show the importance of attributes
+    #importance = grid_searcher.best_estimator_.feature_importances_
+    #attrs_extra = ['rooms_per_household','population_per_household','bedrooms_per_room']
+    #attrs  = attrs_num+attrs_extra+attrs_cat;
+    #attrs_importance = sorted(zip(importance,attrs),reverse=True)
+    #print(attrs_importance)
 
     '''
     #create new attibute
